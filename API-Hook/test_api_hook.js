@@ -6,6 +6,8 @@ const crypto = require('crypto');
 
 class APIHook {
   constructor(options = {}) {
+    // Note: Configuration is hardcoded for testing without external dependencies
+    // In production, use the full api_hook.js which loads from YAML config files
     this.config = {
       security: {
         sensitive_fields: ['password', 'api_key', 'token', 'secret'],

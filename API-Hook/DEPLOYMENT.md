@@ -107,6 +107,32 @@ CREATE INDEX idx_result ON api_log(result);
 CREATE TABLE api_log_2026_01 PARTITION OF api_log
     FOR VALUES FROM ('2026-01-01') TO ('2026-02-01');
 
+-- 自動建立未來分區的函數（建議設定每月執行）
+CREATE OR REPLACE FUNCTION create_monthly_partitions()
+RETURNS void AS $$
+DECLARE
+    start_date DATE;
+    end_date DATE;
+    partition_name TEXT;
+BEGIN
+    -- 為未來 3 個月建立分區
+    FOR i IN 0..2 LOOP
+        start_date := DATE_TRUNC('month', CURRENT_DATE + (i || ' month')::INTERVAL);
+        end_date := start_date + INTERVAL '1 month';
+        partition_name := 'api_log_' || TO_CHAR(start_date, 'YYYY_MM');
+        
+        IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = partition_name) THEN
+            EXECUTE format('CREATE TABLE %I PARTITION OF api_log FOR VALUES FROM (%L) TO (%L)',
+                          partition_name, start_date, end_date);
+            RAISE NOTICE 'Created partition: %', partition_name;
+        END IF;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 執行一次以建立初始分區
+SELECT create_monthly_partitions();
+
 -- 設定權限
 GRANT SELECT, INSERT ON api_log TO api_logger;
 GRANT USAGE, SELECT ON SEQUENCE api_log_id_seq TO api_logger;

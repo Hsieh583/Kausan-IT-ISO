@@ -26,13 +26,17 @@ class APIHook:
     提供 API 呼叫攔截、記錄與監控功能
     """
     
-    def __init__(self, config_path: str = "config.yaml"):
+    def __init__(self, config_path: Optional[str] = None):
         """
         初始化 API Hook
         
         Args:
-            config_path: 配置檔案路徑
+            config_path: 配置檔案路徑 (預設: None, 使用內建配置)
         """
+        if config_path is None:
+            import os
+            # 預設查找與此檔案同目錄的 config.yaml
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
         self.config = self._load_config(config_path)
         self.sensitive_fields = self.config.get('security', {}).get('sensitive_fields', [])
         logger.info("API Hook initialized")
