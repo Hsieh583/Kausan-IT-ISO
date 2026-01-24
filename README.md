@@ -205,12 +205,53 @@ ISO27001_文檔體系/
 
 ---
 
-## 七、後續規劃
+## 七、自動化工具
+
+### 🚀 ISO 27001 自動化證據生成工具
+
+本專案提供自動化工具，協助簡化證據文件的生成與管理：
+
+**核心功能**：
+- ✅ **模板引擎整合**：使用 Jinja2 自動填充模板
+- ✅ **自動歸檔**：按日期自動歸檔至正確路徑 (`記錄與證據/{類別}/{YYYY}/{MM}/`)
+- ✅ **合規性檢查**：掃描目錄結構並生成合規報告
+- ✅ **週報生成**：從 Git Commit 歷史自動生成週報
+- ✅ **GitHub Actions 整合**：自動化 CI/CD 流程
+
+**快速開始**：
+
+```bash
+# 安裝依賴
+cd scripts
+pip install -r requirements.txt
+
+# 列出所有模板
+python iso_automation.py list-templates
+
+# 生成證據文件
+python iso_automation.py generate \
+  --template "記錄與證據/備份與復原/備份執行紀錄_Template.md" \
+  --data examples/backup_data.json
+
+# 生成合規性報告
+python iso_automation.py compliance-report --output compliance_report.md
+```
+
+**完整文檔**：
+- 📖 [README.md](scripts/README.md) - 工具說明
+- 📚 [USAGE_GUIDE.md](scripts/USAGE_GUIDE.md) - 使用指南
+- 📁 [examples/](scripts/examples/) - 範例檔案
+
+---
+
+## 八、後續規劃
 
 * [x] 補齊核心 Procedure（骨架 + SOP 附錄占位）
 * [x] 建立文件 × 記錄對應表
 * [x] 完成文件重組（A9.3/A12/A16 整合）
 * [x] 在所有記錄模板中建立程序連結
+* [x] 建立自動化證據生成工具
+* [x] 整合 GitHub Actions 自動化流程
 * [ ] 建立年度內部稽核對照清單
 * [ ] 視需要建立 PDF 發布流程
 
