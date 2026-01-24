@@ -1,1 +1,9 @@
 *.pdf
+
+# API Hook
+API-Hook/.env
+API-Hook/config.yaml
+API-Hook/node_modules/
+API-Hook/__pycache__/
+API-Hook/*.pyc
+API-Hook/venv/
