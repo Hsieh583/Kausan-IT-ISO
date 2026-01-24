@@ -15,6 +15,8 @@ import json
 import yaml
 import argparse
 import re
+import subprocess
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -135,7 +137,7 @@ class ISOAutomation:
         archive_path = self.evidence_path / category / year / month
         return archive_path / filename
     
-    def ensure_directory(self, path: Path):
+    def ensure_directory(self, path: Path) -> None:
         """
         確保目錄存在，不存在則創建
         
@@ -363,8 +365,6 @@ class ISOAutomation:
         Returns:
             Commit 列表
         """
-        import subprocess
-        
         cmd = ['git', 'log', '--pretty=format:%H|%an|%ae|%ad|%s', '--date=short']
         
         if since:
@@ -508,7 +508,6 @@ def main():
             
         except Exception as e:
             print(f"錯誤: {e}", file=sys.stderr)
-            import traceback
             traceback.print_exc()
             return 1
     
