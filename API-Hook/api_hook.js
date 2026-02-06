@@ -338,8 +338,8 @@ if (require.main === module) {
   app.post('/api/v1/auth/login', hook.protect({ level: 'critical' }), (req, res) => {
     const { username, password } = req.body;
 
-    // 模擬認證
-    if (password === 'wrong') {
+    // 模擬認證 - TEST DATA ONLY
+    if (password === 'test_wrong_password') {  // TEST DATA
       return res.status(401).json({
         status: 'error',
         error: 'Invalid credentials'
@@ -348,7 +348,7 @@ if (require.main === module) {
 
     res.json({
       status: 'success',
-      token: 'jwt-token-here'
+      token: 'example-jwt-token-placeholder'  // TEST DATA - Not a real JWT
     });
   });
 

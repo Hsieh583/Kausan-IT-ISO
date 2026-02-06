@@ -87,7 +87,7 @@ const logEntry1 = hook._createLogEntry({
   endpoint: '/api/v1/users',
   parameters: {
     username: 'john_doe',
-    password: 'secret123',
+    password: 'test_password_123',  // TEST DATA - Not a real password
     email: 'john@example.com'
   },
   responseCode: 200,
@@ -106,7 +106,7 @@ const logEntry2 = hook._createLogEntry({
   endpoint: '/api/v1/auth/login',
   parameters: {
     username: 'jane_doe',
-    password: 'wrong'
+    password: 'test_wrong_password'  // TEST DATA - Example of wrong password
   },
   responseCode: 401,
   responseTimeMs: 50.2,

@@ -323,7 +323,7 @@ if __name__ == '__main__':
     )
     def create_user(user_id: str, username: str, password: str, **kwargs):
         """創建使用者"""
-        # 模擬 API 邏輯
+        # 模擬 API 邏輯 - TEST DATA ONLY
         print(f"Creating user: {username}")
         return {
             'status': 'success',
@@ -339,12 +339,13 @@ if __name__ == '__main__':
     )
     def login(user_id: str, username: str, password: str, **kwargs):
         """使用者登入"""
+        # TEST DATA ONLY - Example login validation
         print(f"User login: {username}")
-        if password == "wrong":
+        if password == "test_wrong_password":  # TEST DATA
             raise Exception("Invalid credentials")
         return {
             'status': 'success',
-            'token': 'jwt-token-here'
+            'token': 'example-jwt-token-placeholder'  # TEST DATA - Not a real JWT
         }
     
     # 測試 API 呼叫
@@ -352,7 +353,7 @@ if __name__ == '__main__':
     result = create_user(
         user_id='user123',
         username='john_doe',
-        password='secure_password',
+        password='test_secure_password',  # TEST DATA - Example password
         source_ip='192.168.1.100',
         method='POST'
     )
@@ -364,7 +365,7 @@ if __name__ == '__main__':
         result = login(
             user_id='user456',
             username='jane_doe',
-            password='wrong',
+            password='test_wrong_password',  # TEST DATA - Example of wrong password
             source_ip='192.168.1.101',
             method='POST'
         )
