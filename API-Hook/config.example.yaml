@@ -1,0 +1,200 @@
+# API Hook Configuration Example
+# 複製此檔案為 config.yaml 並根據環境調整設定
+
+api_hook:
+  # 基本設定
+  enabled: true
+  mode: "production"  # development, staging, production
+  version: "1.0.0"
+
+  # 日誌設定
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    storage: "database"  # database, file, elasticsearch
+    format: "json"  # json, text
+    retention_days: 90
+    max_file_size_mb: 100
+    backup_count: 10
+    
+    # 日誌路徑（當 storage = file 時使用）
+    file_path: "/var/log/api-hook/"
+    
+    # 資料庫設定（當 storage = database 時使用）
+    database:
+      type: "postgresql"  # postgresql, mongodb, mysql
+      host: "localhost"
+      port: 5432
+      database: "api_logs"
+      username: "api_logger"
+      password: "${DB_PASSWORD}"  # 使用環境變數
+      pool_size: 20
+      
+    # Elasticsearch 設定（當 storage = elasticsearch 時使用）
+    elasticsearch:
+      hosts: ["http://localhost:9200"]
+      index_prefix: "api-hook"
+      username: "elastic"
+      password: "${ES_PASSWORD}"
+
+  # 安全設定
+  security:
+    authentication_required: true
+    encrypt_sensitive_data: true
+    hash_algorithm: "SHA256"  # SHA256, SHA512
+    encryption_algorithm: "AES-256-GCM"
+    
+    # 敏感欄位定義（這些欄位將被加密或排除）
+    sensitive_fields:
+      - "password"
+      - "api_key"
+      - "token"
+      - "secret"
+      - "credit_card"
+      - "ssn"
+      - "personal_id"
+    
+    # IP 白名單（可選）
+    whitelist_ips: []
+    
+    # IP 黑名單
+    blacklist_ips: []
+    
+    # 速率限制
+    rate_limiting:
+      enabled: true
+      max_requests_per_minute: 1000
+      max_requests_per_hour: 10000
+      block_duration_seconds: 300
+
+  # 監控設定
+  monitoring:
+    enable_metrics: true
+    metrics_port: 9090
+    metrics_path: "/metrics"
+    
+    # 警報設定
+    alerting:
+      enabled: true
+      webhook_url: "https://alerts.example.com/webhook"
+      email_recipients:
+        - "security@example.com"
+        - "admin@example.com"
+      
+      # 警報規則
+      rules:
+        - name: "High Error Rate"
+          condition: "error_rate > 0.05"  # 5% 錯誤率
+          severity: "WARNING"
+          cooldown_minutes: 15
+          
+        - name: "Unauthorized Access Attempts"
+          condition: "status_code == 401 AND attempts > 5"
+          severity: "CRITICAL"
+          cooldown_minutes: 5
+          
+        - name: "Abnormal API Call Volume"
+          condition: "calls_per_minute > 1000"
+          severity: "WARNING"
+          cooldown_minutes: 10
+          
+        - name: "Slow Response Time"
+          condition: "response_time_ms > 5000"
+          severity: "WARNING"
+          cooldown_minutes: 15
+
+  # 效能設定
+  performance:
+    async_processing: true
+    max_log_queue_size: 10000
+    batch_insert_size: 100
+    batch_flush_interval_seconds: 5
+    worker_threads: 4
+    
+    # 快取設定
+    cache:
+      enabled: true
+      ttl_seconds: 300
+      max_entries: 10000
+
+  # 端點設定
+  endpoints:
+    # 定義需要監控的 API 端點
+    monitored:
+      - path: "/api/v1/users/*"
+        security_level: "high"
+        log_request_body: true
+        log_response_body: false
+        
+      - path: "/api/v1/auth/*"
+        security_level: "critical"
+        log_request_body: true
+        log_response_body: true
+        
+      - path: "/api/v1/public/*"
+        security_level: "low"
+        log_request_body: false
+        log_response_body: false
+    
+    # 排除的端點（不記錄）
+    excluded:
+      - "/health"
+      - "/metrics"
+      - "/favicon.ico"
+
+  # 整合設定
+  integrations:
+    # Wazuh SIEM 整合
+    wazuh:
+      enabled: false
+      server: "wazuh.example.com"
+      port: 1514
+      protocol: "tcp"
+      
+    # Active Directory 整合
+    active_directory:
+      enabled: false
+      server: "ad.example.com"
+      port: 389
+      base_dn: "DC=example,DC=com"
+      
+    # Prometheus 整合
+    prometheus:
+      enabled: true
+      push_gateway: "http://prometheus:9091"
+      job_name: "api-hook"
+
+  # 稽核設定
+  audit:
+    enabled: true
+    retention_years: 7
+    auto_archive: true
+    archive_format: "parquet"  # parquet, csv, json
+    archive_path: "/var/archive/api-hook/"
+    
+    # 稽核報告
+    reports:
+      enabled: true
+      schedule: "monthly"  # daily, weekly, monthly
+      format: "pdf"  # pdf, csv, xlsx
+      recipients:
+        - "compliance@example.com"
+
+# 環境特定覆寫
+environments:
+  development:
+    api_hook:
+      logging:
+        level: "DEBUG"
+      security:
+        authentication_required: false
+        
+  staging:
+    api_hook:
+      logging:
+        retention_days: 30
+        
+  production:
+    api_hook:
+      security:
+        rate_limiting:
+          max_requests_per_minute: 5000
