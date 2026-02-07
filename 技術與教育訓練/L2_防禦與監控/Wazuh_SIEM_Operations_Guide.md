@@ -90,63 +90,59 @@
 
 **案例A：2021 SolarWinds供應鏈攻擊**
 
-```
-攻擊時間線 Attack Timeline:
-
-2020-10-15: 攻擊者滲入SolarWinds軟體編譯系統 (無人察覺)
-             ↓
-2020-12-08: SolarWinds發布含後門軟體（Orion產品）
-             ↓ 下載者: 18,000個組織
-             ↓
-2020-12-13: 美國財政部、國務院等被駭
-             ↓
-2021-01-06: **才被發現**（共52天未檢測！）
-             
-總損失: $1,000,000+
-根本原因: 缺乏集中監控，無法關聯多個系統異常
-
-若有SIEM: 
-✅ Day 1: 偵測異常網路流量
-✅ Day 2: 發現可疑進程行為
-✅ Day 3: 識別橫向移動跡象
-✅ Day 4: 隔離受感染系統
+```mermaid
+flowchart TD
+    A["2020-10-15<br/>攻擊者滲入SolarWinds軟體編譯系統<br/>(無人察覺)"] --> B["2020-12-08<br/>SolarWinds發布含後門軟體<br/>(Orion產品)<br/>下載者: 18,000個組織"]
+    B --> C["2020-12-13<br/>美國財政部、國務院等被駭"]
+    C --> D["2021-01-06<br/>才被發現<br/>(共52天未檢測!)"]
+    D --> E["總損失: $1,000,000+<br/>根本原因: 缺乏集中監控,無法關聯多個系統異常"]
+    
+    style A fill:#ffcccc
+    style B fill:#ffcccc
+    style C fill:#ff9999
+    style D fill:#ff6666
+    style E fill:#ff3333,color:#fff
+    
+    F["若有SIEM:"] --> G["✅ Day 1: 偵測異常網路流量"]
+    G --> H["✅ Day 2: 發現可疑進程行為"]
+    H --> I["✅ Day 3: 識別橫向移動跡象"]
+    I --> J["✅ Day 4: 隔離受感染系統"]
+    
+    style F fill:#ccffcc
+    style G fill:#99ff99
+    style H fill:#99ff99
+    style I fill:#99ff99
+    style J fill:#66ff66
 ```
 
 ---
 
 **案例B：本公司假想情景**
 
+```mermaid
+gantt
+    title 釣魚郵件攻擊情景對比
+    dateFormat HH:mm
+    axisFormat %H:%M
+    
+    section 無SIEM情境
+    員工輸入AD帳密至釣魚網站           :crit, 14:30, 1m
+    攻擊者使用竊取憑證登入             :crit, 14:31, 1m
+    攻擊者開始掃描網路                 :crit, 15:00, 1h
+    開始橫向移動(訪問檔案伺服器)       :crit, 16:00, 1h
+    下載客戶資料(20GB)                 :crit, 17:00, 1h
+    刪除日誌痕跡                       :crit, 18:00, 1h
+    
+    section 有SIEM情境
+    異常登入地點檢測 🚨                :done, 14:30, 1m
+    不尋常的帳號活動 🚨                :done, 14:31, 1m
+    疑似暴力破解攻擊 🚨                :done, 14:45, 1m
+    帳號已鎖定(自動保護) ✅            :active, 14:46, 1m
 ```
-情景: 員工點擊釣魚郵件，憑證被盜
 
-時間軸 Timeline (無SIEM):
-
-14:30 - 員工輸入AD帳密至釣魚網站
-14:31 - 攻擊者使用竊取憑證登入
-15:00 - 攻擊者開始掃描網路
-16:00 - 開始橫向移動（訪問檔案伺服器）
-17:00 - 下載客戶資料（20GB）
-18:00 - 刪除日誌痕跡
-翌日 08:00 - 資訊安全團隊日常巡查才發現異常
-
-總損失時間: 18小時
-數據泄露: 確認
-恢復成本: $100,000+
-
-───────────────────────────────
-
-時間軸 Timeline (有SIEM + Wazuh):
-
-14:30 - ❌ 異常登入地點檢測
-         🚨 告警: AD登入失敗次數異常
-14:31 - ❌ 不尋常的帳號活動
-         🚨 告警: 短時間內多個失敗登入
-14:45 - ❌ 疑似暴力破解攻擊
-         🚨 告警: 帳號已鎖定（自動保護）
-         👤 資安專員收到告警 → 調查
-         
-結果: **攻擊在滲透階段即被阻止！**
-```
+**對比結果：**
+- 無SIEM：總損失時間 18小時，數據泄露確認，恢復成本 $100,000+
+- 有SIEM + Wazuh：**攻擊在滲透階段即被阻止！** (16分鐘內)
 
 ---
 
@@ -154,24 +150,30 @@
 ### Module 1.2: Seven Core Functions of SIEM
 
 **1️⃣ 日誌聚合 Log Aggregation**
-```
-來源分散的日誌 → 中央儲存庫 → 統一分析
 
-┌──────────────┐
-│ Active Directory（500K日誌/天）
-│ 防火牆（200K）
-│ Web伺服器（150K）
-│ 資料庫（100K）
-│ NAS（50K）
-└──────────────┘
-        │
-        ▼ 合併 & 正規化
-        │
-┌──────────────────┐
-│ Wazuh Central    │
-│ 1,000K+ 日誌/天  │
-│ 統一格式存儲    │
-└──────────────────┘
+```mermaid
+flowchart TD
+    subgraph sources["分散的日誌來源"]
+        AD["Active Directory<br/>500K日誌/天"]
+        FW["防火牆<br/>200K日誌/天"]
+        WEB["Web伺服器<br/>150K日誌/天"]
+        DB["資料庫<br/>100K日誌/天"]
+        NAS["NAS<br/>50K日誌/天"]
+    end
+    
+    AD --> |合併 & 正規化| WAZUH
+    FW --> |合併 & 正規化| WAZUH
+    WEB --> |合併 & 正規化| WAZUH
+    DB --> |合併 & 正規化| WAZUH
+    NAS --> |合併 & 正規化| WAZUH
+    
+    WAZUH["Wazuh Central<br/>1,000K+ 日誌/天<br/>統一格式存儲"]
+    
+    WAZUH --> ANALYZE["統一分析"]
+    
+    style sources fill:#ffe6e6
+    style WAZUH fill:#e6f3ff
+    style ANALYZE fill:#e6ffe6
 ```
 
 **好處**:
@@ -182,115 +184,192 @@
 ---
 
 **2️⃣ 關聯分析 Correlation Analysis**
-```
-單一日誌 → 難以檢測攻擊
-多個日誌 → 關聯分析 → 發現攻擊模式
 
-範例：檢測橫向移動
-
-事件1: AD登入失敗 (疑似) → 單獨看無問題
-事件2: 掃描埠21,22,23 (疑似) → 單獨看無問題  
-事件3: SMB連線嘗試 (疑似) → 單獨看無問題
-
-但關聯分析:
-事件1 + 事件2 + 事件3 在同一IP同一時間發生
-= 🚨 **明確的橫向移動攻擊模式**
+```mermaid
+flowchart LR
+    subgraph single["單一日誌分析"]
+        E1["事件1<br/>AD登入失敗<br/>(疑似)"] --> N1["單獨看無問題 ✓"]
+        E2["事件2<br/>掃描埠21,22,23<br/>(疑似)"] --> N2["單獨看無問題 ✓"]
+        E3["事件3<br/>SMB連線嘗試<br/>(疑似)"] --> N3["單獨看無問題 ✓"]
+    end
+    
+    subgraph correlation["關聯分析"]
+        E1C["事件1<br/>AD登入失敗"] --> CORR
+        E2C["事件2<br/>掃描埠21,22,23"] --> CORR
+        E3C["事件3<br/>SMB連線嘗試"] --> CORR
+        CORR["同一IP<br/>同一時間<br/>關聯分析"] --> ALERT["🚨 明確的<br/>橫向移動攻擊模式"]
+    end
+    
+    single -.->|難以檢測攻擊| X[" "]
+    correlation -.->|發現攻擊模式| ALERT
+    
+    style single fill:#ffe6e6
+    style correlation fill:#e6ffe6
+    style ALERT fill:#ff6666,color:#fff
+    style N1 fill:#90EE90
+    style N2 fill:#90EE90
+    style N3 fill:#90EE90
 ```
 
 ---
 
 **3️⃣ 實時告警 Real-time Alerting**
-```
-日誌產生 → 立即分析 → <1秒發送告警
 
-傳統方式（人工檢查）:
-06:00 發生攻擊 → 18:00 人工巡查發現 = 12小時延遲 ❌
-
-SIEM方式（自動告警）:
-06:00 發生攻擊 → 06:01 Wazuh告警 = <1分鐘檢測 ✅
-
-MTTD改善: 12小時 → <1分鐘 = 1,000倍提升
+```mermaid
+flowchart LR
+    subgraph traditional["傳統方式 (人工檢查)"]
+        T1["06:00<br/>發生攻擊"] --> T2["18:00<br/>人工巡查發現"]
+        T2 --> T3["12小時延遲 ❌"]
+    end
+    
+    subgraph siem["SIEM方式 (自動告警)"]
+        S1["06:00<br/>發生攻擊"] --> S2["日誌產生"] --> S3["立即分析<br/><1秒"] --> S4["06:01<br/>Wazuh告警"]
+        S4 --> S5["<1分鐘檢測 ✅"]
+    end
+    
+    IMPROVE["MTTD改善<br/>12小時 → <1分鐘<br/>= 1,000倍提升"]
+    
+    traditional -.-> IMPROVE
+    siem -.-> IMPROVE
+    
+    style traditional fill:#ffcccc
+    style siem fill:#ccffcc
+    style IMPROVE fill:#fff799
+    style T3 fill:#ff6666,color:#fff
+    style S5 fill:#66ff66
 ```
 
 ---
 
 **4️⃣ 調查與取證 Investigation & Forensics**
-```
-Wazuh提供完整的事件追蹤能力:
 
-某攻擊事件 → Wazuh檔案
-├─ 誰: 哪個帳號/IP
-├─ 何時: 精確時間戳
-├─ 何地: 來源IP地理位置
-├─ 做什麼: 具體操作(訪問檔案、修改登錄等)
-├─ 為什麼: 攻擊目的推測(MITRE ATT&CK對應)
-└─ 影響: 影響範圍、受害系統
-
-法律用途:
-✅ 作為證據呈交執法單位
-✅ 保險理賠文檔
-✅ 事後分析與改善
+```mermaid
+mindmap
+  root((Wazuh<br/>事件追蹤))
+    誰 Who
+      哪個帳號
+      來源IP
+    何時 When
+      精確時間戳
+      攻擊時間序列
+    何地 Where
+      來源IP地理位置
+      受影響系統位置
+    做什麼 What
+      訪問檔案
+      修改登錄
+      具體操作記錄
+    為什麼 Why
+      攻擊目的推測
+      MITRE ATT&CK對應
+    影響 Impact
+      影響範圍
+      受害系統
+      數據外洩程度
+    法律用途
+      證據呈交執法單位 ✅
+      保險理賠文檔 ✅
+      事後分析與改善 ✅
 ```
 
 ---
 
 **5️⃣ 合規報告 Compliance Reporting**
-```
-自動產生ISO 27001稽核報告:
 
-ISO 27001要求:
-✅ A12.4.1: 日誌紀錄與監控
-   Wazuh: 記錄所有事件，自動合規報告
-   
-✅ A16.1.2: 事件管理
-   Wazuh: 自動檢測與告警，符合流程
-   
-✅ A16.1.5: 響應與恢復
-   Wazuh: 事件時間線記錄，便於復盤
-
-省時效果:
-手動彙整: 40小時 / 季
-Wazuh報告: 1小時生成 + 2小時審查
-節省: 37小時 / 季 = 148小時 / 年
+```mermaid
+flowchart TD
+    ISO["ISO 27001 要求"] --> A1["✅ A12.4.1<br/>日誌紀錄與監控"]
+    ISO --> A2["✅ A16.1.2<br/>事件管理"]
+    ISO --> A3["✅ A16.1.5<br/>響應與恢復"]
+    
+    A1 --> W1["Wazuh<br/>記錄所有事件<br/>自動合規報告"]
+    A2 --> W2["Wazuh<br/>自動檢測與告警<br/>符合流程"]
+    A3 --> W3["Wazuh<br/>事件時間線記錄<br/>便於復盤"]
+    
+    W1 --> REPORT["自動產生<br/>ISO 27001<br/>稽核報告"]
+    W2 --> REPORT
+    W3 --> REPORT
+    
+    subgraph efficiency["省時效果"]
+        MANUAL["手動彙整<br/>40小時/季"]
+        WAZUH["Wazuh報告<br/>1小時生成 + 2小時審查"]
+        SAVE["節省<br/>37小時/季 = 148小時/年"]
+        
+        MANUAL -.-> SAVE
+        WAZUH -.-> SAVE
+    end
+    
+    REPORT --> efficiency
+    
+    style ISO fill:#e6f3ff
+    style REPORT fill:#ccffcc
+    style SAVE fill:#fff799
 ```
 
 ---
 
 **6️⃣ 威脅情報整合 Threat Intelligence Integration**
-```
-已知惡意IP/域名/哈希值 + Wazuh監控
-= 自動檢測已知威脅
 
-外部威脅源:
-├─ AlienVault OTX（開源）
-├─ Abuse.ch（釣魚域名）
-├─ VirusTotal（惡意文件哈希）
-└─ CISA Alerts（美國政府告警）
-
-集成後自動告警:
-日誌中發現 AlienVault OTX已知惡意IP
-🚨 Wazuh立即告警 → IT人員處置
+```mermaid
+flowchart LR
+    subgraph threat["外部威脅源"]
+        OTX["AlienVault OTX<br/>(開源)"]
+        ABUSE["Abuse.ch<br/>(釣魚域名)"]
+        VT["VirusTotal<br/>(惡意文件哈希)"]
+        CISA["CISA Alerts<br/>(美國政府告警)"]
+    end
+    
+    OTX --> WAZUH["Wazuh監控"]
+    ABUSE --> WAZUH
+    VT --> WAZUH
+    CISA --> WAZUH
+    
+    LOGS["日誌數據"] --> WAZUH
+    
+    WAZUH --> MATCH{"發現已知<br/>惡意IP/域名/哈希"}
+    MATCH -->|匹配| ALERT["🚨 Wazuh立即告警"]
+    ALERT --> ACTION["IT人員處置"]
+    
+    style threat fill:#ffe6e6
+    style WAZUH fill:#e6f3ff
+    style ALERT fill:#ff6666,color:#fff
+    style ACTION fill:#66ff66
 ```
 
 ---
 
 **7️⃣ 異常檢測 Anomaly Detection**
-```
-機器學習識別異常行為:
 
-正常基線 Normal Baseline:
-📊 用戶通常 08:00-18:00 工作
-   數據流量 < 100MB/天
-   登入地點 = 公司內部
-   檔案訪問 = 工作資料夾
-
-異常偵測 Anomaly Detection:
-🚨 凌晨03:00 登入（異常時間）
-🚨 下載100GB數據（異常大量）
-🚨 登入地點 = 俄羅斯IP（異常位置）
-🚨 訪問100個不同資料夾（異常廣泛）
-
-Wazuh結論: **疑似數據外洩攻擊**
+```mermaid
+flowchart TD
+    subgraph baseline["正常基線 Normal Baseline"]
+        B1["📊 用戶通常 08:00-18:00 工作"]
+        B2["📊 數據流量 < 100MB/天"]
+        B3["📊 登入地點 = 公司內部"]
+        B4["📊 檔案訪問 = 工作資料夾"]
+    end
+    
+    subgraph anomaly["異常偵測 Anomaly Detection"]
+        A1["🚨 凌晨03:00 登入<br/>(異常時間)"]
+        A2["🚨 下載100GB數據<br/>(異常大量)"]
+        A3["🚨 登入地點 = 俄羅斯IP<br/>(異常位置)"]
+        A4["🚨 訪問100個不同資料夾<br/>(異常廣泛)"]
+    end
+    
+    baseline --> ML["機器學習<br/>建立基線"]
+    ML --> DETECT["持續監控<br/>偵測偏離"]
+    DETECT --> anomaly
+    
+    A1 --> SCORE["Wazuh評分系統"]
+    A2 --> SCORE
+    A3 --> SCORE
+    A4 --> SCORE
+    
+    SCORE --> CONCLUSION["總分 > 10<br/>疑似數據外洩攻擊"]
+    
+    style baseline fill:#e6ffe6
+    style anomaly fill:#ffe6e6
+    style CONCLUSION fill:#ff6666,color:#fff
 ```
 
 ---
@@ -300,91 +379,69 @@ Wazuh結論: **疑似數據外洩攻擊**
 
 #### 架構概述 Architecture Overview
 
-```
-┌─────────────────────────────────────────────┐
-│           Wazuh SIEM 系統架構               │
-│         Wazuh System Architecture           │
-├─────────────────────────────────────────────┤
-│                                             │
-│ 代理層 Agent Tier:                          │
-│ ┌────────────────────────────────────────┐ │
-│ │ Wazuh Agent (每台主機安裝)              │ │
-│ │ ┌─────────────┐  ┌─────────────┐      │ │
-│ │ │ Windows PC  │  │ Linux Server│      │ │
-│ │ │ Agent:      │  │ Agent:      │      │ │
-│ │ │ 監控事件日誌│  │ 監控系統日誌│      │ │
-│ │ │ 檔案完整性  │  │ 檔案完整性  │      │ │
-│ │ │ 進程監控    │  │ 進程監控    │      │ │
-│ │ └─────────────┘  └─────────────┘      │ │
-│ │          ↓            ↓                 │ │
-│ │    加密傳輸 (TLS)     ↓                 │ │
-│ │          ↓            ↓                 │ │
-│ │ ┌─────────────────────────────┐        │ │
-│ │ │ Agentless 監控              │        │ │
-│ │ │ (防火牆、NAS、交換機等)     │        │ │
-│ │ │ 無需Agent，直接API/SSH查詢  │        │ │
-│ │ └─────────────────────────────┘        │ │
-│ └────────────────────────────────────────┘ │
-│         ↓ 所有流量加密整合                 │
-│                                             │
-│ 管理器層 Manager Tier:                      │
-│ ┌────────────────────────────────────────┐ │
-│ │ Wazuh Manager (集中化)                 │ │
-│ │ ┌──────────────────────────────────┐   │ │
-│ │ │ 1. Agent Manager 代理管理         │   │ │
-│ │ │    - 註冊新Agent                 │   │ │
-│ │ │    - 監控Agent連線狀態            │   │ │
-│ │ │    - Agent分組管理                │   │ │
-│ │ ├──────────────────────────────────┤   │ │
-│ │ │ 2. Analysis Engine 分析引擎       │   │ │
-│ │ │    - 日誌解析與規則比對           │   │ │
-│ │ │    - 關聯分析                    │   │ │
-│ │ │    - 告警產生                    │   │ │
-│ │ ├──────────────────────────────────┤   │ │
-│ │ │ 3. Alert Queue & Trigger 告警隊列│   │ │
-│ │ │    - 告警去重                    │   │ │
-│ │ │    - 發送郵件/Slack通知           │   │ │
-│ │ │    - 積分聚合                    │   │ │
-│ │ ├──────────────────────────────────┤   │ │
-│ │ │ 4. RESTful API                   │   │ │
-│ │ │    - 自定義查詢                  │   │ │
-│ │ │    - 與外部系統整合               │   │ │
-│ │ │    - Kibana通訊                  │   │ │
-│ │ └──────────────────────────────────┘   │ │
-│ └────────────────────────────────────────┘ │
-│         ↓ 存儲檢索                         │
-│                                             │
-│ 儲存層 Storage Tier:                        │
-│ ┌────────────────────────────────────────┐ │
-│ │ Elasticsearch (日誌索引庫)              │ │
-│ │ ┌──────────────────────────────────┐   │ │
-│ │ │ Index: wazuh-alerts-2026.01.30  │   │ │
-│ │ │ 索引: 告警數據（可快速搜尋）      │   │ │
-│ │ ├──────────────────────────────────┤   │ │
-│ │ │ Index: wazuh-events-2026.01.30  │   │ │
-│ │ │ 索引: 原始日誌（完整歷史）        │   │ │
-│ │ ├──────────────────────────────────┤   │ │
-│ │ │ 集群模式: 3節點 (HA高可用)        │   │ │
-│ │ │ 保留期: 30天（可配置）            │   │ │
-│ │ │ 磁碟空間: ~100GB/月               │   │ │
-│ │ └──────────────────────────────────┘   │ │
-│ └────────────────────────────────────────┘ │
-│         ↓ 數據視覺化                       │
-│                                             │
-│ 可視化層 Visualization Tier:                │
-│ ┌────────────────────────────────────────┐ │
-│ │ Kibana 儀表板                          │ │
-│ │ ├─ 告警面板 (實時告警流)               │ │
-│ │ ├─ 威脅狩獵面板 (MITRE ATT&CK)        │ │
-│ │ ├─ 合規面板 (ISO 27001)               │ │
-│ │ ├─ 攻擊地理位置圖                      │ │
-│ │ └─ 自定義報告                          │ │
-│ └────────────────────────────────────────┘ │
-│                                             │
-└─────────────────────────────────────────────┘
-
-用戶視角 User View:
-資安專員 → 瀏覽Kibana儀表板 → 點擊告警 → 查看詳細日誌 → 手動或自動響應
+```mermaid
+flowchart TD
+    subgraph agent["代理層 Agent Tier"]
+        WA["Wazuh Agent<br/>(每台主機安裝)"]
+        WIN["Windows PC Agent<br/>監控事件日誌<br/>檔案完整性<br/>進程監控"]
+        LIN["Linux Server Agent<br/>監控系統日誌<br/>檔案完整性<br/>進程監控"]
+        AGENTLESS["Agentless 監控<br/>(防火牆、NAS、交換機等)<br/>無需Agent，直接API/SSH查詢"]
+    end
+    
+    WIN --> |加密傳輸 TLS| MANAGER
+    LIN --> |加密傳輸 TLS| MANAGER
+    AGENTLESS --> |API/SSH| MANAGER
+    
+    subgraph manager["管理器層 Manager Tier"]
+        MANAGER["Wazuh Manager (集中化)"]
+        AM["1. Agent Manager<br/>代理管理"]
+        AE["2. Analysis Engine<br/>分析引擎"]
+        AQ["3. Alert Queue & Trigger<br/>告警隊列"]
+        API["4. RESTful API"]
+        
+        MANAGER --> AM
+        MANAGER --> AE
+        MANAGER --> AQ
+        MANAGER --> API
+    end
+    
+    MANAGER --> |存儲檢索| ES
+    
+    subgraph storage["儲存層 Storage Tier"]
+        ES["Elasticsearch<br/>(日誌索引庫)"]
+        IDX1["Index: wazuh-alerts"]
+        IDX2["Index: wazuh-events"]
+        CLUSTER["集群: 3節點 HA<br/>保留: 30天<br/>空間: ~100GB/月"]
+        
+        ES --> IDX1
+        ES --> IDX2
+        ES --> CLUSTER
+    end
+    
+    ES --> |數據視覺化| KIBANA
+    
+    subgraph viz["可視化層 Visualization Tier"]
+        KIBANA["Kibana 儀表板"]
+        D1["告警面板<br/>(實時告警流)"]
+        D2["威脅狩獵面板<br/>(MITRE ATT&CK)"]
+        D3["合規面板<br/>(ISO 27001)"]
+        D4["攻擊地理位置圖"]
+        
+        KIBANA --> D1
+        KIBANA --> D2
+        KIBANA --> D3
+        KIBANA --> D4
+    end
+    
+    USER["👤 資安專員"] --> |瀏覽| KIBANA
+    KIBANA --> |點擊告警| DETAIL["查看詳細日誌"]
+    DETAIL --> |處理| RESPONSE["手動或自動響應"]
+    
+    style agent fill:#ffe6e6
+    style manager fill:#e6f3ff
+    style storage fill:#fff9e6
+    style viz fill:#e6ffe6
+    style USER fill:#d0d0ff
 ```
 
 ---
@@ -392,89 +449,126 @@ Wazuh結論: **疑似數據外洩攻擊**
 #### 三大部署模型 Three Deployment Models
 
 **模型1: All-in-One（本公司現在適用）**
-```
-單一伺服器配置:
 
-┌────────────────────────────────┐
-│ Wazuh伺服器（All-in-One）       │
-├────────────────────────────────┤
-│ ✅ Wazuh Manager (1個)          │
-│ ✅ Elasticsearch (3個節點虛擬)   │
-│ ✅ Kibana (1個)                 │
-│ ✅ Wazuh API (內建)             │
-└────────────────────────────────┘
-         ↑
-    40個代理連接
-
-規格需求:
-- CPU: 8核心+
-- RAM: 32GB+
-- 磁碟: 500GB+ SSD
-- 網路: 1Gbps
-
-優點:
-✅ 簡單易部署
-✅ 成本低（一台伺服器）
-✅ 適合<1000個Agent
-
-缺點:
-❌ 本身是SPOF（單點故障）
-❌ 效能限制（難以處理超大規模）
-❌ 升級需停機
+```mermaid
+flowchart TD
+    subgraph allinone["Wazuh伺服器 All-in-One"]
+        M["✅ Wazuh Manager (1個)"]
+        E["✅ Elasticsearch (3個節點虛擬)"]
+        K["✅ Kibana (1個)"]
+        A["✅ Wazuh API (內建)"]
+    end
+    
+    AGENTS["40個代理連接"] --> allinone
+    
+    subgraph specs["規格需求"]
+        CPU["CPU: 8核心+"]
+        RAM["RAM: 32GB+"]
+        DISK["磁碟: 500GB+ SSD"]
+        NET["網路: 1Gbps"]
+    end
+    
+    subgraph pros["優點"]
+        P1["✅ 簡單易部署"]
+        P2["✅ 成本低 (一台伺服器)"]
+        P3["✅ 適合 <1000個Agent"]
+    end
+    
+    subgraph cons["缺點"]
+        C1["❌ 單點故障 SPOF"]
+        C2["❌ 效能限制"]
+        C3["❌ 升級需停機"]
+    end
+    
+    allinone -.-> specs
+    allinone -.-> pros
+    allinone -.-> cons
+    
+    style allinone fill:#e6f3ff
+    style specs fill:#fff9e6
+    style pros fill:#e6ffe6
+    style cons fill:#ffe6e6
 ```
 
 ---
 
 **模型2: 分散式集群（未來目標）**
-```
-多個Manager + ES集群:
 
-┌─────────────────────────────┐
-│ Wazuh Manager集群           │
-│ ├─ Manager1 (負責1-13節點)  │
-│ ├─ Manager2 (負責14-26節點) │
-│ └─ Manager3 (負責27-40節點) │
-└─────────────────────────────┘
-    ↓ 集群通訊 (1514埠)
-┌─────────────────────────────┐
-│ Elasticsearch集群           │
-│ ├─ ES-Node1 (主節點)        │
-│ ├─ ES-Node2 (數據節點)      │
-│ └─ ES-Node3 (數據節點)      │
-└─────────────────────────────┘
-    ↓
-┌─────────────────────────────┐
-│ Kibana (1-3個負載均衡)      │
-└─────────────────────────────┘
-
-優點:
-✅ HA高可用（Manager故障自動轉移）
-✅ 水平擴展（支持1000+個Agent）
-✅ 滾動升級（無停機）
-
-缺點:
-❌ 複雜度高
-❌ 成本高（3-5台伺服器）
-❌ 需要集群管理經驗
+```mermaid
+flowchart TD
+    subgraph managers["Wazuh Manager集群"]
+        M1["Manager1<br/>(負責1-13節點)"]
+        M2["Manager2<br/>(負責14-26節點)"]
+        M3["Manager3<br/>(負責27-40節點)"]
+    end
+    
+    managers --> |集群通訊 1514埠| ES_CLUSTER
+    
+    subgraph ES_CLUSTER["Elasticsearch集群"]
+        ES1["ES-Node1<br/>(主節點)"]
+        ES2["ES-Node2<br/>(數據節點)"]
+        ES3["ES-Node3<br/>(數據節點)"]
+    end
+    
+    ES_CLUSTER --> KIBANA_CLUSTER
+    
+    subgraph KIBANA_CLUSTER["Kibana負載均衡"]
+        KB1["Kibana-1"]
+        KB2["Kibana-2"]
+        KB3["Kibana-3"]
+    end
+    
+    subgraph pros2["優點"]
+        P1["✅ HA高可用 (Manager故障自動轉移)"]
+        P2["✅ 水平擴展 (支持1000+個Agent)"]
+        P3["✅ 滾動升級 (無停機)"]
+    end
+    
+    subgraph cons2["缺點"]
+        C1["❌ 複雜度高"]
+        C2["❌ 成本高 (3-5台伺服器)"]
+        C3["❌ 需要集群管理經驗"]
+    end
+    
+    KIBANA_CLUSTER -.-> pros2
+    KIBANA_CLUSTER -.-> cons2
+    
+    style managers fill:#e6f3ff
+    style ES_CLUSTER fill:#fff9e6
+    style KIBANA_CLUSTER fill:#e6ffe6
+    style pros2 fill:#ccffcc
+    style cons2 fill:#ffcccc
 ```
 
 ---
 
 **模型3: 雲端託管（三方服務）**
-```
-使用Wazuh Cloud服務:
 
-本公司 ← 代理 → Wazuh官方雲 → 儀表板 + 儲存 + 分析
-
-優點:
-✅ 零維護（官方負責）
-✅ 自動HA（內建）
-✅ 及時更新
-
-缺點:
-❌ 成本較高（Agent數量計費）
-❌ 數據存儲於雲端（合規考量）
-❌ 網路依賴
+```mermaid
+flowchart LR
+    COMPANY["本公司"] <--> |代理| CLOUD["Wazuh官方雲"]
+    CLOUD --> SERVICES["儀表板 + 儲存 + 分析"]
+    
+    subgraph pros3["優點"]
+        P1["✅ 零維護 (官方負責)"]
+        P2["✅ 自動HA (內建)"]
+        P3["✅ 及時更新"]
+    end
+    
+    subgraph cons3["缺點"]
+        C1["❌ 成本較高 (Agent數量計費)"]
+        C2["❌ 數據存儲於雲端 (合規考量)"]
+        C3["❌ 網路依賴"]
+    end
+    
+    SERVICES -.-> pros3
+    SERVICES -.-> cons3
+    
+    style COMPANY fill:#e6f3ff
+    style CLOUD fill:#fff9e6
+    style SERVICES fill:#e6ffe6
+    style pros3 fill:#ccffcc
+    style cons3 fill:#ffcccc
 ```
 
 ---
