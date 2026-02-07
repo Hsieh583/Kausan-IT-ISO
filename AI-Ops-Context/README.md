@@ -72,7 +72,56 @@
 
 ---
 
+---
+
+## 🚀 IT 主管儀表板 (Streamlit Dashboard)
+
+### 安裝與執行
+
+1. **安裝依賴套件**：
+   ```bash
+   cd AI-Ops-Context
+   pip install -r requirements.txt
+   ```
+
+2. **配置環境變數** (可選)：
+   ```bash
+   cp .env.example .env
+   # 編輯 .env 文件，填入你的 API Keys
+   ```
+
+3. **啟動儀表板**：
+   ```bash
+   streamlit run app.py
+   ```
+
+4. **訪問儀表板**：
+   打開瀏覽器訪問 `http://localhost:8501`
+
+### 功能特性
+
+* **📊 實時狀態監控**：側邊欄顯示各據點的實時狀態（未來對接 Zabbix API）
+* **📋 ISO 紀錄整合**：橫向讀取 `ISO27001_文檔體系` 中的資產管理與備份日誌
+* **🤖 AI 診斷助手**：聊天室介面，支持自動上下文注入（未來對接 Gemini/Dify API）
+* **🔍 資產依賴圖**：視覺化顯示關鍵資產之間的依賴關係
+* **⚡ 快速行動按鈕**：一鍵執行 Exchange Log 抓取、生成報告等操作
+
+### 目錄結構
+
+```text
+/AI-Ops-Context
+├── app.py                 # Streamlit 主程式
+├── requirements.txt       # Python 依賴套件
+├── .env.example          # 環境變數範例
+└── README.md             # 本文件
+```
+
+---
+
 ## 💡 下一步行動 (Next Steps)
 
+* [x] **建立 Streamlit 儀表板**：實現基礎功能框架。
 * [ ] **初始化 `Knowledge_Graph.md`**：使用 Mermaid 語法繪製核心 SQL 與各據點工作站的連線邏輯。
 * [ ] **封裝第一條管線**：將你目前最常用的「郵件 Log 查詢腳本」輸出格式標準化。
+* [ ] **對接 Zabbix API**：實現真實的據點狀態監控。
+* [ ] **整合 AI API**：連接 Gemini 或 Dify 實現智能診斷。

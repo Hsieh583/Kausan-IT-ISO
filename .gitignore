@@ -19,3 +19,11 @@ API-Hook/node_modules/
 API-Hook/__pycache__/
 API-Hook/*.pyc
 API-Hook/venv/
+
+# AI-Ops-Context / Streamlit Dashboard
+AI-Ops-Context/.env
+AI-Ops-Context/__pycache__/
+AI-Ops-Context/*.pyc
+AI-Ops-Context/venv/
+AI-Ops-Context/.streamlit/
+AI-Ops-Context/*.log
