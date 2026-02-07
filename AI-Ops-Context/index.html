@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kausan IT-Ops Dashboard - 入口頁面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .feature-card p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .launch-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .launch-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .step-content p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .code-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .btn-launch {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            background: #f8f9fa;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .alert-icon {
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Kausan IT-Ops Dashboard</h1>
+            <p>ISO 27001 合規營運中樞 <span class="status-badge status-ready">v1.0 就緒</span></p>
+        </div>
+
+        <div class="content">
+            <h2 style="color: #333; margin-bottom: 20px;">✨ 核心功能</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <h3>實時監控</h3>
+                    <p>5 據點狀態面板</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📋</div>
+                    <h3>ISO 紀錄整合</h3>
+                    <p>橫向讀取合規文件</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🤖</div>
+                    <h3>AI 診斷助手</h3>
+                    <p>智能故障分析</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔍</div>
+                    <h3>資產依賴圖</h3>
+                    <p>視覺化系統拓樸</p>
+                </div>
+            </div>
+
+            <div class="alert">
+                <span class="alert-icon">⚡</span>
+                <strong>快速啟動：</strong>雙擊 <code>啟動儀表板.bat</code> 即可一鍵啟動服務！
+            </div>
+
+            <div class="launch-section">
+                <h2>🚀 啟動指南</h2>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>方法一：使用啟動腳本（推薦）</h3>
+                        <p>雙擊執行 <strong>啟動儀表板.bat</strong>，腳本會自動檢查環境並啟動儀表板</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>方法二：手動啟動</h3>
+                        <p>開啟終端機/PowerShell，執行以下命令：</p>
+                        <div class="code-box">
+cd AI-Ops-Context<br>
+pip install -r requirements.txt<br>
+streamlit run app.py
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>訪問儀表板</h3>
+                        <p>啟動後，瀏覽器會自動開啟，或手動訪問：</p>
+                        <div class="code-box">
+http://localhost:8501
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="#" onclick="window.open('http://localhost:8501'); return false;" class="btn-launch">
+                    🖥️ 開啟儀表板
+                </a>
+                <br>
+                <a href="README.md" class="btn-secondary">📖 查看文件</a>
+                <a href="https://github.com/Hsieh583/Kausan-IT-ISO" class="btn-secondary">💻 GitHub 專案</a>
+            </div>
+
+            <div class="launch-section">
+                <h2>⚙️ 進階設定</h2>
+                
+                <div class="step">
+                    <div class="step-number">📝</div>
+                    <div class="step-content">
+                        <h3>配置 API 連接（選配）</h3>
+                        <p>如需啟用 Zabbix 監控或 AI 診斷功能：</p>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>複製 <code>.env.example</code> 並重新命名為 <code>.env</code></li>
+                            <li>填入您的 API Keys（Gemini、Dify、Zabbix）</li>
+                            <li>重新啟動儀表板</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🏢 Kausan IT Department | ISO 27001 資訊安全管理系統</p>
+            <p>📅 2026 Q1 | 由 GitHub Copilot 輔助開發</p>
+        </div>
+    </div>
+</body>
+</html>
