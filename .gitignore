@@ -1,5 +1,17 @@
 *.pdf
 
+# Sensitive files
+.env
+*.env
+.env.*
+config.yaml
+secrets.yaml
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+
 # API Hook
 API-Hook/.env
 API-Hook/config.yaml

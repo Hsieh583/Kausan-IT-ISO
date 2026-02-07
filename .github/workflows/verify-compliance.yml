@@ -1,0 +1,123 @@
+name: ISO 27001 合規性驗證
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    # 每週一早上 8:00 (UTC) 執行
+    - cron: '0 8 * * 1'
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  compliance-check:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - name: 檢出程式碼
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 取得完整的 git 歷史記錄
+      
+      - name: 設置 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 安裝依賴
+        run: |
+          cd scripts
+          pip install -r requirements.txt
+      
+      - name: 執行合規性掃描
+        id: compliance
+        run: |
+          cd scripts
+          python iso_automation.py compliance-report --output ../compliance_report.md
+          
+          # 檢查是否有問題
+          echo "Compliance scan completed"
+      
+      - name: 顯示合規性報告
+        run: |
+          echo "=== 合規性掃描報告 ==="
+          cat compliance_report.md
+      
+      - name: 上傳合規性報告
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report-${{ github.sha }}
+          path: compliance_report.md
+          retention-days: 90
+      
+      - name: 生成本週週報
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          cd scripts
+          LAST_WEEK=$(date -d '7 days ago' +%Y-%m-%d)
+          TODAY=$(date +%Y-%m-%d)
+          python iso_automation.py weekly-report \
+            --since "$LAST_WEEK" \
+            --until "$TODAY" \
+            --output ../weekly_report.md || echo "No commits found"
+      
+      - name: 上傳週報
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report-${{ github.run_number }}
+          path: weekly_report.md
+          retention-days: 365
+        continue-on-error: true
+      
+      - name: 檢查證據記錄完整性
+        run: |
+          echo "=== 檢查證據記錄完整性 ==="
+          
+          # 統計各類別的證據記錄數量
+          cd "記錄與證據"
+          
+          for category in */; do
+            if [ -d "$category" ]; then
+              category_name=$(basename "$category")
+              
+              # 跳過非目錄項目
+              if [[ "$category_name" == *.md ]]; then
+                continue
+              fi
+              
+              # 統計模板數量
+              template_count=$(find "$category" -maxdepth 1 -name "*_Template.md" | wc -l)
+              
+              # 統計證據記錄數量
+              record_count=$(find "$category" -type f -name "*.md" ! -name "*_Template.md" | wc -l)
+              
+              echo "📁 $category_name: $template_count 個模板, $record_count 個記錄"
+            fi
+          done
+      
+      - name: 評論 PR (如果是 PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('compliance_report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🔍 ISO 27001 合規性檢查結果\n\n${report}`
+            });
