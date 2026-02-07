@@ -76,7 +76,19 @@
 
 ## 🚀 IT 主管儀表板 (Streamlit Dashboard)
 
-### 安裝與執行
+### 快速開始
+
+#### 方法一：使用啟動腳本（推薦 ⭐）
+
+1. **開啟 HTML 入口頁面**：
+   - 雙擊開啟 `index.html`，查看完整的儀表板說明和啟動指南
+
+2. **一鍵啟動**：
+   - 雙擊執行 `啟動儀表板.bat`（Windows）
+   - 腳本會自動檢查並安裝依賴套件，然後啟動儀表板
+   - 瀏覽器會自動開啟 `http://localhost:8501`
+
+#### 方法二：手動安裝與執行
 
 1. **安裝依賴套件**：
    ```bash
@@ -86,7 +98,12 @@
 
 2. **配置環境變數** (可選)：
    ```bash
+   # Windows
+   copy .env.example .env
+   
+   # macOS/Linux
    cp .env.example .env
+   
    # 編輯 .env 文件，填入你的 API Keys
    ```
 
@@ -113,6 +130,8 @@
 ├── app.py                 # Streamlit 主程式
 ├── requirements.txt       # Python 依賴套件
 ├── .env.example          # 環境變數範例
+├── index.html            # HTML 入口頁面（使用指南）
+├── 啟動儀表板.bat         # Windows 一鍵啟動腳本
 └── README.md             # 本文件
 ```
 
