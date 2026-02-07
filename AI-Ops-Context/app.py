@@ -3,6 +3,9 @@ import pandas as pd
 import os
 from pathlib import Path
 
+# 常數定義
+PREVIEW_LENGTH = 500  # 文件預覽長度
+
 # 1. 基礎配置
 st.set_page_config(page_title="Kausan IT-Ops Dashboard", layout="wide")
 ROOT_DIR = Path(__file__).parent.parent  # 橫向定位到 Kausan-IT-ISO 根目錄
@@ -39,9 +42,12 @@ with col_main:
                 if file_content_path.exists():
                     with open(file_content_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                    # 顯示前500個字符
-                    preview = content[:500] if len(content) > 500 else content
-                    st.code(f"讀取自：{selected_file}\n\n{preview}...", language="markdown")
+                    # 顯示文件預覽
+                    if len(content) > PREVIEW_LENGTH:
+                        preview = content[:PREVIEW_LENGTH] + "..."
+                    else:
+                        preview = content
+                    st.code(f"讀取自：{selected_file}\n\n{preview}", language="markdown")
             else:
                 st.warning("未找到備份日誌文件")
         else:
@@ -70,9 +76,12 @@ with col_main:
                 if asset_file_path.exists():
                     with open(asset_file_path, 'r', encoding='utf-8') as f:
                         asset_content = f.read()
-                    # 顯示前400個字符
-                    asset_preview = asset_content[:400] if len(asset_content) > 400 else asset_content
-                    st.code(asset_preview + "...", language="markdown")
+                    # 顯示文件預覽
+                    if len(asset_content) > 400:
+                        asset_preview = asset_content[:400] + "..."
+                    else:
+                        asset_preview = asset_content
+                    st.code(asset_preview, language="markdown")
 
 # 4. 右側 AI 區：診斷助手
 with col_ai:
